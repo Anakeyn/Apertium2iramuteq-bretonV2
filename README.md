@@ -1,4 +1,4 @@
-# Apertium2iramuteq-breton
+# Apertium2iramuteq-bretonV2
 
 Dictionnaire de lemmatisation du **breton** pour [IRaMuTeQ](https://pratinaud.gitpages.huma-num.fr/iramuteq-website/), construit à partir du dictionnaire morphologique libre d'[Apertium](https://github.com/apertium/apertium-bre) (`apertium-bre`, par Francis Tyers, Fulup Jakez et Gwenvael Jekel, avec le soutien de l'Ofis ar Brezhoneg).
 
@@ -10,6 +10,23 @@ Le dépôt contient :
 - un **script de préparation** des textes bretons pour IRaMuTeQ ;
 - les **scripts de construction**, pour régénérer le dictionnaire depuis Apertium ;
 - un **corpus de test** prêt à ouvrir.
+
+Ce dépôt est la **version 2**, corrigée. La première version reste disponible, inchangée, dans [Anakeyn/Apertium2iramuteq-breton](https://github.com/Anakeyn/Apertium2iramuteq-breton), pour permettre de comparer les deux.
+
+## Ce qui change par rapport à la v1
+
+Les sources Apertium sont les mêmes (voir la [section 6](#6-régénérer-le-dictionnaire)), le fichier d'expressions est identique : seules les corrections ci-dessous distinguent les deux lexiques.
+
+| Correction | v1 | v2 |
+|---|---|---|
+| Négation *ket* | `adv` (adverbe plein, actif dans les analyses) | `adv_sup`, comme *ne*, et comme *ne* et *pas* en français |
+| Verbes en double dans Apertium | *monet*, *gellout*, *lavarout*, *lâret*, *gelver* : lemmes distincts | rattachés à *mont*, *gallout*, *lavaret*, *gervel* (421 formes) |
+| Formes de *kaout* écrites en deux mots (*en deus*, *o devez*, *o devo*, *en doe*) | le second mot isolé était lu comme un verbe plein : *deus* → dont, *devez* et *devo* → deviñ, *doe* → teiñ | *kaout* (`aux`) |
+| *deze*, contraction de *deveze* (*en deze*) | non reconnu | *kaout* (`aux`) |
+| Pronoms personnels | lemmes internes d'Apertium `prpers` et `direct` | lemme du pronom sujet de la même personne : *anezhañ*, *hen* → eñ ; *ac'hanon*, *am* → me ; réfléchis en *-unan* : *e-unanik*, *e-unan* → e-unan |
+| *te* (tu) | lu comme le nom *te* (thé) | pronom ; le nom devient *te_nom* |
+
+Le lexique compte 256 310 formes et 11 844 lemmes hors expressions (v1 : 256 309 formes, 11 837 lemmes).
 
 ## Sommaire
 
@@ -25,7 +42,7 @@ Le dépôt contient :
 
 | Fichier | Contenu |
 |---|---|
-| `dictionnaire/lexique_br.txt` | 260 047 formes, 13 114 lemmes, UTF-8, une ligne par forme : `forme<TAB>lemme<TAB>catégorie` |
+| `dictionnaire/lexique_br.txt` | 260 048 formes, 13 121 lemmes (expressions soudées comprises), UTF-8, une ligne par forme : `forme<TAB>lemme<TAB>catégorie` |
 | `dictionnaire/expression_br.txt` | 3 738 expressions, au format des fichiers d'expressions d'IRaMuTeQ : `expression<TAB>forme soudée<TAB>catégorie` |
 | `corpus_test/corpus_test_breton.txt` | Corpus de test déjà préparé, UTF-8 (Linux, macOS) |
 | `corpus_test/corpus_test_breton_windows.txt` | Le même, en Windows-1252 |
@@ -38,8 +55,9 @@ Le corpus de test reprend les 1 164 phrases du corpus d'Apertium, réparties en 
 
 ## 2. Ce que fait le dictionnaire
 
-- **Les mutations sont lemmatisées** : *dud*, *tud* → den ; *Wengamp* → Gwengamp ; *zeu* → dont. *c'hoari* muté de *koari* est distingué de *c'hoari* (jouer).
+- **Les mutations sont lemmatisées** : *dud*, *tud* → den ; *vamm* → mamm ; *zeu* → dont. *c'hoari* muté de *koari* est distingué de *c'hoari* (jouer).
 - **Les verbes conjugués** sont rattachés à l'infinitif : *graet* → ober. *eo*, *emañ*, *bet* → bezañ, classé `aux` comme *kaout*, à l'image d'*être* et *avoir* en français.
+- **Les pronoms personnels** sont rattachés au pronom sujet de la même personne : *anezhañ* → eñ, *ac'hanon* → me. Les réfléchis gardent leur forme en *-unan* : *hec'h-unanik* → he-unan.
 - **Les prépositions conjuguées** sont rattachées à la préposition : *gantañ* → gant.
 - **Les mots-outils** reçoivent les catégories d'IRaMuTeQ : `art_def`, `pre`, `con`, `pro_per`, `adj_pos`… Ils sont donc **supplémentaires** par défaut dans les analyses, comme en français.
 - **Les noms propres ne sont pas inclus** : ils restent « non reconnus », comme avec le dictionnaire français.
@@ -127,6 +145,7 @@ Il suit le format des fichiers d'expressions d'IRaMuTeQ, mais **ne l'installez p
 
   Environ 12 000 formes sont concernées, et certains choix seront faux en contexte. C'est la limite de toute lemmatisation sans désambiguïsation.
 - **Un lemme = une catégorie**, c'est aussi une contrainte d'IRaMuTeQ. Quand un mot-outil et un mot plein partagent un lemme, le moins fréquent reçoit un suffixe. Exemple : *e_adv_sup* pour la particule verbale *e(z)*, à distinguer de la préposition *e*.
+- **Mots-outils très ambigus** : *ma*, *o* et *e* reçoivent toujours la même lecture (possessif pour *ma* et *o*, préposition pour *e*), même quand ce sont des particules ou des conjonctions. Seul un étiquetage en contexte pourrait les distinguer. Comme ce sont des mots-outils, ils sont supplémentaires et n'influencent pas les classifications.
 - **Catégorie `pro_per`** (pronoms personnels). Si votre IRaMuTeQ ne la connaît pas (fichier `key.cfg`), régénérez le dictionnaire avec `--sans-pro-per` pour les classer en `pro_ind`.
 - **Expressions** : seules les locutions figées sont retenues. Les locutions verbales d'Apertium (*gouzout brezhoneg*, *mont e kêr*…) sont écartées : les souder ferait disparaître des comptages des mots comme *brezhoneg* ou *kêr*. Pour la même raison, les tournures préposition + nom ou adjectif (*e brezhoneg*, *er skol*, *e genver*) restent en deux mots.
 - **Orthographe** : Apertium suit l'orthographe unifiée (*peurunvan*). Les textes en orthographe universitaire, interdialectale ou anciens seront moins bien couverts.
@@ -146,7 +165,7 @@ Sans `git`, les deux dépôts se téléchargent aussi avec **Code → Download Z
 | Fichier | Rôle |
 |---|---|
 | `expanseur_dix.py` | Développe le dictionnaire Apertium (`.dix`) en couples forme / analyse |
-| `construire_lexique_br.py` | Convertit les analyses aux catégories d'IRaMuTeQ, tranche les ambiguïtés, écrit le lexique et le fichier d'expressions |
+| `construire_lexique_br.py` | Convertit les analyses aux catégories d'IRaMuTeQ, tranche les ambiguïtés, écrit le lexique et le fichier d'expressions. Les corrections propres au breton sont regroupées en tête du script : `NEGATIONS`, `VARIANTES`, `AJOUTS` et les lemmes des pronoms |
 
 | Option de `construire_lexique_br.py` | Effet |
 |---|---|
@@ -164,7 +183,7 @@ La construction est reproductible : avec les versions ci-dessous, elle redonne e
 | [apertium-bre](https://github.com/apertium/apertium-bre) | commit `e69f6b6`, 21 juillet 2021 |
 | [apertium-br-fr](https://github.com/apertium/apertium-br-fr) | commit `6f0ec11`, 31 mai 2023 |
 
-Pour enrichir le dictionnaire, le plus utile est de contribuer à `apertium-bre`, puis de relancer la construction.
+Pour corriger une erreur de rattachement sans attendre Apertium, ajoutez la forme à `AJOUTS` ou la variante à `VARIANTES` dans `construire_lexique_br.py`, puis relancez la construction. Pour enrichir le dictionnaire, le plus utile est de contribuer à `apertium-bre`, puis de relancer la construction.
 
 ## 7. Licence et citation
 
@@ -172,4 +191,4 @@ Pour enrichir le dictionnaire, le plus utile est de contribuer à `apertium-bre`
 
 Pour citer ce travail :
 
-> Rouarch, P. (2026). *Apertium2iramuteq-breton : dictionnaire breton pour IRaMuTeQ à partir d'Apertium*. Anakeyn. https://github.com/Anakeyn/Apertium2iramuteq-breton
+> Rouarch, P. (2026). *Apertium2iramuteq-bretonV2 : dictionnaire breton pour IRaMuTeQ à partir d'Apertium, version 2*. Anakeyn. https://github.com/Anakeyn/Apertium2iramuteq-bretonV2
