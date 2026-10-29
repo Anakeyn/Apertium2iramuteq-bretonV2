@@ -40,6 +40,55 @@ from expanseur_dix import Expanseur, decouper_analyse  # noqa: E402
 APOSTROPHES = "'’ʼ‘`"
 AUXILIAIRES = {"bezañ", "kaout", "endevout"}
 
+# Adverbes de négation : « ket » est étiqueté adverbe simple dans Apertium
+# (paradigme ouzhpenn__adv, sans <neg>). On le range avec « ne » en adv_sup,
+# comme « ne » et « pas » dans le dictionnaire français d'IRaMuTeQ.
+NEGATIONS = {"ket"}
+
+# Variantes enregistrées par Apertium comme des lemmes distincts (souvent en
+# lecture seule, r="LR") : on les rattache au lemme standard pour ne pas
+# compter deux fois le même verbe.
+VARIANTES = {
+    "monet": "mont",
+    "gellout": "gallout",
+    "lavarout": "lavaret",
+    "lâret": "lavaret",
+    "gelver": "gervel",
+}
+
+# Lemmes internes d'Apertium pour les pronoms personnels. On leur donne un
+# lemme lisible : le pronom sujet de la personne, et pour les réfléchis la
+# forme en -unan.
+PRONOM_SUJET = {("p1", "sg"): "me", ("p2", "sg"): "te", ("p1", "pl"): "ni",
+                ("p2", "pl"): "cʼhwi", ("p3", "pl"): "int",
+                ("p3", "m", "sg"): "eñ", ("p3", "f", "sg"): "hi"}
+PRONOM_REFLECHI = {("p1", "sg"): "ma-unan", ("p2", "sg"): "da-unan",
+                   ("p1", "pl"): "hon-unan", ("p2", "pl"): "hocʼh-unan",
+                   ("p3", "pl"): "o-unan", ("p3", "m", "sg"): "e-unan",
+                   ("p3", "f", "sg"): "he-unan"}
+
+
+def lemme_pronom(surface, etiquettes):
+    """Lemme lisible pour « prpers » et « direct »."""
+    s = set(etiquettes)
+    pers = next((p for p in ("p1", "p2", "p3") if p in s), None)
+    nb = "pl" if "pl" in s else "sg"
+    cle = (pers, nb)
+    if pers == "p3" and nb == "sg":
+        cle = (pers, "f" if "f" in s else "m", nb)
+    if "ref" in s:
+        if surface.lower().startswith("an-unan"):
+            return "an-unan"                # « an-unan » : soi-même
+        return PRONOM_REFLECHI.get(cle)
+    return PRONOM_SUJET.get(cle)
+
+
+# Formes absentes d'Apertium, ajoutées à la main : forme -> (lemme, catégorie)
+AJOUTS = {
+    "deze": ("kaout", "aux"),       # contraction de « deveze » (en deze)
+}
+
+
 PLEINS = {"nom", "ver", "adj", "adv"}
 
 # rang : plus petit = préféré en cas d'ambiguïté
@@ -77,7 +126,7 @@ def categorie(etiquettes, lemme, pro_per=True):
     if t == "adj":
         return "adj"
     if t in ("adv", "preadv"):
-        return "adv_sup" if "neg" in s else "adv"
+        return "adv_sup" if "neg" in s or lemme in NEGATIONS else "adv"
     if t == "pr":
         return "pre"
     if t in ("cnjcoo", "cnjsub", "cnjadv"):
@@ -224,6 +273,9 @@ def main():
         if not surface.strip():
             continue
         lemme_brut, etiq = decouper_analyse(analyse)
+        lemme_brut = VARIANTES.get(lemme_brut, lemme_brut)
+        if lemme_brut in ("prpers", "direct"):
+            lemme_brut = lemme_pronom(surface, etiq[1:]) or lemme_brut
         cat = categorie(etiq, lemme_brut, not a.sans_pro_per)
         if not cat:
             continue
@@ -246,6 +298,9 @@ def main():
         if (not forme or not re.fullmatch(r"[a-zà-ÿœæ_\-]+", forme)
                 or not re.fullmatch(r"[a-zà-ÿœæ_\-]+", lemme)):
             continue
+        # « mutée » au sens large : toute forme dont l'initiale diffère de
+        # celle du lemme (mutation, mais aussi forme élidée ou dialectale :
+        # vat -> avat, eur -> bezañ). Ces lectures passent après les autres.
         mutee = forme[:1] != lemme[:1] and not forme.startswith(lemme[:2])
         composee = "+" in analyse
         analyses[forme].add((lemme, cat, mutee, composee))
@@ -300,16 +355,31 @@ def main():
 
     cat_du_lemme = {lemme: cat for lemme, cat in choix.values()}
     ajoutes = 0
+    remplaces = []
     for morceau, compteur in morceaux.items():
-        if morceau in choix or len(morceau) < 2 or not re.fullmatch(r"[a-zà-ÿœæ_]+", morceau):
+        if len(morceau) < 2 or not re.fullmatch(r"[a-zà-ÿœæ_]+", morceau):
             continue
         # à égalité : graphie standard (war- plutôt que àr-), puis la plus courte
         # (raok -> a-raok plutôt que war-raok)
         (lemme, cat), _ = max(compteur.items(), key=lambda kv: (kv[1], kv[0][0].replace('_', '').isascii(), -len(kv[0][0]), kv[0]))
+        if morceau in choix:
+            # « en devez », « o devo », « en deus », « en doe » : ces formes
+            # de kaout n'existent dans Apertium qu'en deux mots ; le mot isolé
+            # y est un verbe plein rare (deviñ, dont, teiñ). L'auxiliaire
+            # l'emporte sur un verbe plein, jamais sur un autre mot-outil.
+            if not (cat == "aux" and choix[morceau][1] == "ver"):
+                continue
+            remplaces.append(f"{morceau} ({choix[morceau][0]} -> {lemme})")
+        else:
+            ajoutes += 1
         cat = cat_du_lemme.setdefault(lemme, cat)
         choix[morceau] = (lemme, cat)
-        ajoutes += 1
     print(f"{ajoutes} éléments de locutions ajoutés (raok -> a-raok, doa -> kaout…).")
+    print(f"{len(remplaces)} formes rendues à l'auxiliaire : {', '.join(sorted(remplaces))}.")
+
+    for forme, (lemme, cat) in AJOUTS.items():
+        choix[forme] = (lemme, cat_du_lemme.setdefault(lemme, cat))
+    print(f"{len(AJOUTS)} formes ajoutées à la main ({', '.join(AJOUTS)}).")
 
     if not a.sans_expressions:
         chemin_exp = a.expressions or os.path.join(os.path.dirname(a.sortie) or ".", "expression_br.txt")
