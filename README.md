@@ -21,7 +21,7 @@ Les sources Apertium sont les mêmes (voir la [section 6](#6-régénérer-le-dic
 |---|---|---|
 | Négation *ket* | `adv` (adverbe plein, actif dans les analyses) | `adv_sup`, comme *ne*, et comme *ne* et *pas* en français |
 | Verbes en double dans Apertium | *monet*, *gellout*, *lavarout*, *lâret*, *gelver* : lemmes distincts | rattachés à *mont*, *gallout*, *lavaret*, *gervel* (421 formes) |
-| Formes de *kaout* écrites en deux mots (*en deus*, *o devez*, *o devo*, *en doe*) | le second mot isolé était lu comme un verbe plein : *deus* → dont, *devez* et *devo* → deviñ, *doe* → teiñ | *kaout* (`aux`) |
+| Formes de *kaout* écrites en deux mots (*o devez*, *o devo*, *en doe*) | le second mot isolé était lu comme un verbe plein : *devez* et *devo* → deviñ, *doe* → teiñ | *kaout* (`aux`). *deus* isolé reste *dont* : c'est l'impératif « viens », et *en deus*, *he deus*… sont déjà soudés par les expressions |
 | *deze*, contraction de *deveze* (*en deze*) | non reconnu | *kaout* (`aux`) |
 | Pronoms personnels | lemmes internes d'Apertium `prpers` et `direct` | lemme du pronom sujet de la même personne : *anezhañ*, *hen* → eñ ; *ac'hanon*, *am* → me ; réfléchis en *-unan* : *e-unanik*, *e-unan* → e-unan |
 | *te* (tu) | lu comme le nom *te* (thé) | pronom ; le nom devient *te_nom* |

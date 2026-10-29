@@ -53286,7 +53286,7 @@ deurvezont	teurvezout	ver
 deurvezor	teurvezout	ver
 deurvezot	teurvezout	ver
 deurvezout	teurvezout	ver
-deus	kaout	aux
+deus	dont	ver
 deut	dont	ver
 deutonek	deutonek	adj
 deutonek-ac_hub	deutonek	adj

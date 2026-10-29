@@ -83,6 +83,12 @@ def lemme_pronom(surface, etiquettes):
     return PRONOM_SUJET.get(cle)
 
 
+# Formes que la règle « l'auxiliaire l'emporte sur un verbe plein » ne doit
+# pas toucher : isolées, elles sont presque toujours un verbe plein. « deus »
+# est l'impératif de « dont » (viens) ; « en deus », « he deus »… sont déjà
+# couverts par les expressions soudées.
+GARDER_VERBE_PLEIN = {"deus"}
+
 # Formes absentes d'Apertium, ajoutées à la main : forme -> (lemme, catégorie)
 AJOUTS = {
     "deze": ("kaout", "aux"),       # contraction de « deveze » (en deze)
@@ -363,11 +369,14 @@ def main():
         # (raok -> a-raok plutôt que war-raok)
         (lemme, cat), _ = max(compteur.items(), key=lambda kv: (kv[1], kv[0][0].replace('_', '').isascii(), -len(kv[0][0]), kv[0]))
         if morceau in choix:
-            # « en devez », « o devo », « en deus », « en doe » : ces formes
-            # de kaout n'existent dans Apertium qu'en deux mots ; le mot isolé
-            # y est un verbe plein rare (deviñ, dont, teiñ). L'auxiliaire
-            # l'emporte sur un verbe plein, jamais sur un autre mot-outil.
+            # « en devez », « o devo », « en doe » : ces formes de kaout
+            # n'existent dans Apertium qu'en deux mots ; le mot isolé y est un
+            # verbe plein rare (deviñ, teiñ). L'auxiliaire l'emporte sur un
+            # verbe plein, jamais sur un autre mot-outil, ni sur les formes
+            # de GARDER_VERBE_PLEIN.
             if not (cat == "aux" and choix[morceau][1] == "ver"):
+                continue
+            if morceau in GARDER_VERBE_PLEIN:
                 continue
             remplaces.append(f"{morceau} ({choix[morceau][0]} -> {lemme})")
         else:
