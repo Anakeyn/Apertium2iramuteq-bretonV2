@@ -11,7 +11,7 @@ Le dépôt contient :
 - les **scripts de construction**, pour régénérer le dictionnaire depuis Apertium ;
 - un **corpus de test** prêt à ouvrir.
 
-Ce dépôt est la **version 2**, corrigée. La première version reste disponible, inchangée, dans [Anakeyn/Apertium2iramuteq-breton](https://github.com/Anakeyn/Apertium2iramuteq-breton), pour permettre de comparer les deux.
+Ce dépôt est la **version 2**, corrigée. Les corrections et leur effet sur une analyse IRaMuTeQ sont présentés dans l'article [Correction du dictionnaire de breton d'Apertium vers IRaMuTeQ](https://www.anakeyn.com/2026/10/29/correction-du-dictionnaire-de-breton-dapertium-vers-iramuteq/). La première version reste disponible, inchangée, dans [Anakeyn/Apertium2iramuteq-breton](https://github.com/Anakeyn/Apertium2iramuteq-breton), pour permettre de comparer les deux.
 
 ## Ce qui change par rapport à la v1
 
@@ -166,6 +166,7 @@ Sans `git`, les deux dépôts se téléchargent aussi avec **Code → Download Z
 |---|---|
 | `expanseur_dix.py` | Développe le dictionnaire Apertium (`.dix`) en couples forme / analyse |
 | `construire_lexique_br.py` | Convertit les analyses aux catégories d'IRaMuTeQ, tranche les ambiguïtés, écrit le lexique et le fichier d'expressions. Les corrections propres au breton sont regroupées en tête du script : `NEGATIONS`, `VARIANTES`, `AJOUTS` et les lemmes des pronoms |
+| `comparer_lexiques.py` | Compare deux lexiques (formes ajoutées, retirées, lectures modifiées) et mesure l'effet des différences sur un corpus préparé : `python3 comparer_lexiques.py lexique_v1.txt lexique_v2.txt corpus.txt` |
 
 | Option de `construire_lexique_br.py` | Effet |
 |---|---|
@@ -192,3 +193,8 @@ Pour corriger une erreur de rattachement sans attendre Apertium, ajoutez la form
 Pour citer ce travail :
 
 > Rouarch, P. (2026). *Apertium2iramuteq-bretonV2 : dictionnaire breton pour IRaMuTeQ à partir d'Apertium, version 2*. Anakeyn. https://github.com/Anakeyn/Apertium2iramuteq-bretonV2
+
+Pour en savoir plus :
+
+- article de la v2 : https://www.anakeyn.com/2026/10/29/correction-du-dictionnaire-de-breton-dapertium-vers-iramuteq/
+- article de la v1 : https://www.anakeyn.com/2026/10/29/transformation-dun-dictionnaire-de-breton-apertium-utilisable-par-iramuteq/
